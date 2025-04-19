@@ -10,7 +10,7 @@ from plotly.subplots import make_subplots
 def load_data_and_create_figure():
     # Load the datasets using relative paths
     reviews = pd.read_csv("normalized_reviews.csv")
-    depression = pd.read_csv("student_depression.csv")
+    depression = pd.read_csv("student_depression_normalized.csv")
     performance = pd.read_csv("studperlt2_normalized.csv")
 
     # Prepare data for plots
