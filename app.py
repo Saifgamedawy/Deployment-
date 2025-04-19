@@ -104,8 +104,8 @@ st.subheader("Exploratory Data Analysis (EDA)")
 st.plotly_chart(fig, use_container_width=True)
 
 # Load pre-trained model and preprocessor
-model = joblib.load('student_performance_model.pkl')
-preprocessor = joblib.load('preprocessor.pkl')
+model = joblib.load('student_performance_model2.pkl')
+preprocessor = joblib.load('preprocessor2.pkl')
 
 # Prediction interface
 st.subheader("Model Prediction")
