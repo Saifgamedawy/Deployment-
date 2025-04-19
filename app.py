@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from sklearn.preprocessing import LabelEncoder
 
 # Cache the data loading and figure creation for performance
 @st.cache_data
@@ -123,7 +124,14 @@ if st.button("Predict Performance"):
 
     # Manually apply LabelEncoder transformation
     for col in input_data.columns:
-        input_data[col] = preprocessor.transform(input_data[col])
+        # Use try-except to handle unseen categories
+        try:
+            input_data[col] = preprocessor.transform(input_data[col])
+        except ValueError:
+            # Handle unknown category
+            encoder = LabelEncoder()
+            encoder.fit(input_data[col].unique())
+            input_data[col] = encoder.transform(input_data[col])
 
     # Predict
     prediction = model.predict(input_data)[0]
