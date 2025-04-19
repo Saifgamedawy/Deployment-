@@ -110,26 +110,24 @@ preprocessor = joblib.load('preprocessor.pkl')
 # Prediction interface
 st.subheader("Model Prediction")
 
-# Input for Father's and Mother's Degree
+# Input selectors
 father_degree = st.selectbox("Select Father's Degree", ["High School", "Bachelor", "No Degree", "PhD", "Master"])
 mother_degree = st.selectbox("Select Mother's Degree", ["High School", "Bachelor", "No Degree", "PhD", "Master"])
+education_type = st.selectbox("Select Education Type", ["National", "Private", "International"])
 
+# Prediction button
 if st.button("Predict Performance"):
-    # Convert input degrees into the correct format for the preprocessor
-    input_data = pd.DataFrame([[father_degree, mother_degree]],
-                               columns=['Father Degree', 'Mother Degree'])
+    # Create input DataFrame
+    input_data = pd.DataFrame([[mother_degree, father_degree, education_type]],
+                              columns=['Mother Degree', 'Father Degree', 'Education Type'])
 
-    # Handle unseen labels during transformation:
-    # If using LabelEncoder and you're encountering new labels, one solution is to fit the encoder with all possible labels
-    # or manually map the inputs to the existing encoded values.
-    try:
-        # Transform the data with the preprocessor (check if it's one-hot or label encoded)
-        input_data_encoded = preprocessor.transform(input_data)
-    except ValueError:
-        # Manually handle unseen labels here, or re-fit the preprocessor if needed
-        input_data_encoded = input_data
+    # Manually apply LabelEncoder transformation
+    for col in input_data.columns:
+        input_data[col] = preprocessor.transform(input_data[col])
 
-    # Make prediction
-    prediction = model.predict(input_data_encoded)[0]
+    # Predict
+    prediction = model.predict(input_data)[0]
+
+    # Display result
     st.header("Prediction Result")
-    st.write(f"Predicted Final Score: {prediction:.2f}")
+    st.write(f"🎯 Predicted Final Score: **{prediction:.2f}**")
