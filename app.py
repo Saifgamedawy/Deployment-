@@ -115,15 +115,21 @@ father_degree = st.selectbox("Select Father's Degree", ["High School", "Bachelor
 mother_degree = st.selectbox("Select Mother's Degree", ["High School", "Bachelor", "No Degree", "PhD", "Master"])
 
 if st.button("Predict Performance"):
-    # Encode the degrees using the preprocessor (LabelEncoder or OneHotEncoder)
+    # Convert input degrees into the correct format for the preprocessor
     input_data = pd.DataFrame([[father_degree, mother_degree]],
                                columns=['Father Degree', 'Mother Degree'])
-    
-    # If using LabelEncoder:
-    input_data['Father Degree'] = preprocessor.transform(input_data['Father Degree'])
-    input_data['Mother Degree'] = preprocessor.transform(input_data['Mother Degree'])
-    
+
+    # Handle unseen labels during transformation:
+    # If using LabelEncoder and you're encountering new labels, one solution is to fit the encoder with all possible labels
+    # or manually map the inputs to the existing encoded values.
+    try:
+        # Transform the data with the preprocessor (check if it's one-hot or label encoded)
+        input_data_encoded = preprocessor.transform(input_data)
+    except ValueError:
+        # Manually handle unseen labels here, or re-fit the preprocessor if needed
+        input_data_encoded = input_data
+
     # Make prediction
-    prediction = model.predict(input_data)[0]
+    prediction = model.predict(input_data_encoded)[0]
     st.header("Prediction Result")
     st.write(f"Predicted Final Score: {prediction:.2f}")
