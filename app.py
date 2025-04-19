@@ -110,18 +110,20 @@ preprocessor = joblib.load('preprocessor.pkl')
 # Prediction interface
 st.subheader("Model Prediction")
 
-col1, col2 = st.columns(2)
-with col1:
-    study_time = st.number_input("Study Time (hours/week)", min_value=0, max_value=50, value=10)
-    academic_pressure_input = st.number_input("Academic Pressure", min_value=0, max_value=10, value=5)
-with col2:
-    age = st.number_input("Age", min_value=0, max_value=100, value=20)
-    depression_level = st.number_input("Depression Level", min_value=0, max_value=10, value=3)
+# Input for Father's and Mother's Degree
+father_degree = st.selectbox("Select Father's Degree", ["High School", "Bachelor", "No Degree", "PhD", "Master"])
+mother_degree = st.selectbox("Select Mother's Degree", ["High School", "Bachelor", "No Degree", "PhD", "Master"])
 
 if st.button("Predict Performance"):
-    input_data = pd.DataFrame([[study_time, academic_pressure_input, age, depression_level]],
-                               columns=['StudyTime', 'Academic Pressure', 'Age', 'Depressio nLevel'])
-    processed_data = preprocessor.transform(input_data)
-    prediction = model.predict(processed_data)[0]
+    # Encode the degrees using the preprocessor (LabelEncoder or OneHotEncoder)
+    input_data = pd.DataFrame([[father_degree, mother_degree]],
+                               columns=['Father Degree', 'Mother Degree'])
+    
+    # If using LabelEncoder:
+    input_data['Father Degree'] = preprocessor.transform(input_data['Father Degree'])
+    input_data['Mother Degree'] = preprocessor.transform(input_data['Mother Degree'])
+    
+    # Make prediction
+    prediction = model.predict(input_data)[0]
     st.header("Prediction Result")
-    st.write(f"Predicted CGPA/Performance: {prediction:.2f}")
+    st.write(f"Predicted Final Score: {prediction:.2f}")
