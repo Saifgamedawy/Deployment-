@@ -14,28 +14,33 @@ def load_data_and_create_figure():
     depression = pd.read_csv("student_depression_normalized.csv")
     performance = pd.read_csv("studperlt2_normalized.csv")
 
+    # Create combined Parental Degree for plotting
+    performance['Parental Degree'] = performance['Mother Degree'].astype(str) + " & " + performance['Father Degree'].astype(str)
+
     # Prepare data for plots
     final_score = performance['Final Score'].dropna()
-    father_education = performance['Father Degree'].dropna()
+    parental_degree = performance['Parental Degree'].dropna()
+    education_type = performance['Education Type'].dropna()
     academic_pressure = depression['Academic Pressure'].dropna()
     cgpa = depression['CGPA'].dropna()
     satisfaction = reviews['Sentiment Score'].dropna()
 
-    # Create a 2x2 subplot grid
-    fig = make_subplots(rows=2, cols=2, 
-                        subplot_titles=('Father Degree vs Final Score', 
+    # Create a 2x3 subplot grid
+    fig = make_subplots(rows=2, cols=3, 
+                        subplot_titles=('Parental Degree vs Final Score', 
                                         'Academic Pressure vs CGPA', 
                                         'Online Learning Satisfaction', 
-                                        'Correlation Matrix'),
+                                        'Correlation Matrix',
+                                        'Education Type vs Final Score'),
                         vertical_spacing=0.15,
-                        horizontal_spacing=0.15)
+                        horizontal_spacing=0.1)
 
-    # Question 1: Father Degree vs Final Score
+    # Q1: Parental Degree vs Final Score
     fig.add_trace(
         go.Box(
-            x=father_education,
+            x=parental_degree,
             y=final_score,
-            name='Father Degree vs Final Score',
+            name='Parental Degree vs Final Score',
             boxpoints='all',
             line=dict(color='orange'),
             fillcolor='rgba(255, 165, 0, 0.5)',
@@ -44,7 +49,7 @@ def load_data_and_create_figure():
         row=1, col=1
     )
 
-    # Question 4: Academic Pressure vs CGPA
+    # Q4: Academic Pressure vs CGPA
     fig.add_trace(
         go.Scatter(
             x=academic_pressure,
@@ -56,7 +61,7 @@ def load_data_and_create_figure():
         row=1, col=2
     )
 
-    # Question 3: Online learning satisfaction
+    # Q3: Online learning satisfaction
     fig.add_trace(
         go.Histogram(
             x=satisfaction,
@@ -66,10 +71,10 @@ def load_data_and_create_figure():
             marker=dict(color='green'),
             opacity=0.7
         ),
-        row=2, col=1
+        row=1, col=3
     )
 
-    # Correlation matrix
+    # Correlation Matrix
     corr_matrix = performance.select_dtypes(include=[np.number]).corr()
     fig.add_trace(
         go.Heatmap(
@@ -82,12 +87,27 @@ def load_data_and_create_figure():
             textfont={"size": 10},
             colorbar=dict(len=0.45, y=0.21, yanchor='middle')
         ),
+        row=2, col=1
+    )
+
+    # Q2: Education Type vs Final Score
+    fig.add_trace(
+        go.Box(
+            x=education_type,
+            y=final_score,
+            name='Education Type vs Final Score',
+            boxpoints='all',
+            marker_color='purple',
+            fillcolor='rgba(160, 32, 240, 0.5)',
+            opacity=0.7
+        ),
         row=2, col=2
     )
 
+    # Update layout
     fig.update_layout(
-        height=1200,
-        width=1200,
+        height=1000,
+        width=1500,
         title_text="Student Performance and Online Learning Analysis",
         title_x=0.5,
         showlegend=True,
