@@ -30,7 +30,6 @@ def load_data_and_create_figure():
                         subplot_titles=('Parental Degree vs Final Score', 
                                         'Academic Pressure vs CGPA', 
                                         'Online Learning Satisfaction', 
-                                        'Correlation Matrix',
                                         'Education Type vs Final Score'),
                         vertical_spacing=0.15,
                         horizontal_spacing=0.1)
