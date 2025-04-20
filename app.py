@@ -25,14 +25,18 @@ def load_data_and_create_figure():
     cgpa = depression['CGPA'].dropna()
     satisfaction = reviews['Sentiment Score'].dropna()
 
-    # Create a 2x3 subplot grid
-    fig = make_subplots(rows=2, cols=3, 
-                        subplot_titles=('Parental Degree vs Final Score', 
-                                        'Academic Pressure vs CGPA', 
-                                        'Online Learning Satisfaction', 
-                                        'Education Type vs Final Score'),
-                        vertical_spacing=0.15,
-                        horizontal_spacing=0.1)
+    # Create a 2x2 subplot grid (correlation matrix removed)
+    fig = make_subplots(
+        rows=2, cols=2, 
+        subplot_titles=(
+            'Parental Degree vs Final Score', 
+            'Academic Pressure vs CGPA', 
+            'Online Learning Satisfaction', 
+            'Education Type vs Final Score'
+        ),
+        vertical_spacing=0.15,
+        horizontal_spacing=0.15
+    )
 
     # Q1: Parental Degree vs Final Score
     fig.add_trace(
@@ -70,7 +74,7 @@ def load_data_and_create_figure():
             marker=dict(color='green'),
             opacity=0.7
         ),
-        row=1, col=3
+        row=2, col=1
     )
 
     # Q2: Education Type vs Final Score
@@ -87,10 +91,9 @@ def load_data_and_create_figure():
         row=2, col=2
     )
 
-    # Update layout
     fig.update_layout(
         height=1000,
-        width=1500,
+        width=1200,
         title_text="Student Performance and Online Learning Analysis",
         title_x=0.5,
         showlegend=True,
