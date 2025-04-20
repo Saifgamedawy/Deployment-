@@ -74,22 +74,6 @@ def load_data_and_create_figure():
         row=1, col=3
     )
 
-    # Correlation Matrix
-    corr_matrix = performance.select_dtypes(include=[np.number]).corr()
-    fig.add_trace(
-        go.Heatmap(
-            z=corr_matrix.values,
-            x=corr_matrix.columns,
-            y=corr_matrix.columns,
-            colorscale='RdBu',
-            text=corr_matrix.values.round(2),
-            texttemplate="%{text}",
-            textfont={"size": 10},
-            colorbar=dict(len=0.45, y=0.21, yanchor='middle')
-        ),
-        row=2, col=1
-    )
-
     # Q2: Education Type vs Final Score
     fig.add_trace(
         go.Box(
