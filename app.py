@@ -8,15 +8,18 @@ from sklearn.preprocessing import LabelEncoder
 
 @st.cache_data
 def load_data_and_create_figure():
+    # Load the datasets
     reviews = pd.read_csv("normalized_reviews.csv")
     depression = pd.read_csv("student_depression_transformed.csv")
     performance = pd.read_csv("studperlt2_normalized.csv")
 
+    # Extract relevant columns
     final_score = performance['Final Score'].dropna()
     father_education = performance['Father Degree'].dropna()
     academic_pressure = depression['Academic Pressure'].dropna()
     satisfaction = reviews['Sentiment Score'].dropna()
 
+    # Create the figure with multiple subplots
     fig = make_subplots(rows=2, cols=2, 
                         subplot_titles=('Father Degree vs Final Score', 
                                         'Academic Pressure vs Final Score', 
@@ -24,6 +27,7 @@ def load_data_and_create_figure():
                         vertical_spacing=0.15,
                         horizontal_spacing=0.15)
 
+    # Father Degree vs Final Score (Box plot)
     fig.add_trace(
         go.Box(
             x=father_education,
@@ -37,6 +41,7 @@ def load_data_and_create_figure():
         row=1, col=1
     )
 
+    # Academic Pressure vs Final Score (Scatter plot)
     fig.add_trace(
         go.Scatter(
             x=academic_pressure,
@@ -48,6 +53,7 @@ def load_data_and_create_figure():
         row=1, col=2
     )
 
+    # Online Learning Satisfaction (Histogram)
     fig.add_trace(
         go.Histogram(
             x=satisfaction,
@@ -60,6 +66,7 @@ def load_data_and_create_figure():
         row=2, col=1
     )
 
+    # Update layout for better visualization
     fig.update_layout(
         height=1200,
         width=1200,
@@ -77,10 +84,12 @@ performance, fig = load_data_and_create_figure()
 # Display the title and description of the app
 st.title("Student Performance Analysis and Online Learning Insights")
 st.subheader("Exploratory Data Analysis (EDA)")
+
+# Display the Plotly figure
 st.plotly_chart(fig, use_container_width=True)
 
-# Load trained model and preprocessor
-mm = joblib.load('student_performance_model2.pkl')
+# Load the pre-trained model and preprocessor
+m = joblib.load('student_performance_model2.pkl')
 preprocessor = joblib.load('preprocessor2.pkl')
 
 # Mapping for 'Academic Pressure' categories
