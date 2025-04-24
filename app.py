@@ -6,21 +6,17 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from sklearn.preprocessing import LabelEncoder
 
-
 @st.cache_data
 def load_data_and_create_figure():
-    # Load the datasets
     reviews = pd.read_csv("normalized_reviews.csv")
     depression = pd.read_csv("student_depression_transformed.csv")
     performance = pd.read_csv("studperlt2_normalized.csv")
 
-    # Extract relevant columns
     final_score = performance['Final Score'].dropna()
     father_education = performance['Father Degree'].dropna()
     academic_pressure = depression['Academic Pressure'].dropna()
     satisfaction = reviews['Sentiment Score'].dropna()
 
-    # Create the figure with multiple subplots
     fig = make_subplots(rows=2, cols=2, 
                         subplot_titles=('Father Degree vs Final Score', 
                                         'Academic Pressure vs Final Score', 
@@ -28,7 +24,6 @@ def load_data_and_create_figure():
                         vertical_spacing=0.15,
                         horizontal_spacing=0.15)
 
-    # Father Degree vs Final Score (Box plot)
     fig.add_trace(
         go.Box(
             x=father_education,
@@ -42,7 +37,6 @@ def load_data_and_create_figure():
         row=1, col=1
     )
 
-    # Academic Pressure vs Final Score (Scatter plot)
     fig.add_trace(
         go.Scatter(
             x=academic_pressure,
@@ -54,7 +48,6 @@ def load_data_and_create_figure():
         row=1, col=2
     )
 
-    # Online Learning Satisfaction (Histogram)
     fig.add_trace(
         go.Histogram(
             x=satisfaction,
@@ -67,7 +60,6 @@ def load_data_and_create_figure():
         row=2, col=1
     )
 
-    # Update layout for better visualization
     fig.update_layout(
         height=1200,
         width=1200,
@@ -79,54 +71,51 @@ def load_data_and_create_figure():
 
     return performance, fig
 
-
 # Load data and create the figure
 performance, fig = load_data_and_create_figure()
 
 # Display the title and description of the app
 st.title("Student Performance Analysis and Online Learning Insights")
 st.subheader("Exploratory Data Analysis (EDA)")
-
-# Display the Plotly figure
 st.plotly_chart(fig, use_container_width=True)
 
-# Load the pre-trained model and preprocessor
-m = joblib.load('student_performance_model2.pkl')
+# Load trained model and preprocessor
+model = joblib.load('student_performance_model2.pkl')
 preprocessor = joblib.load('preprocessor2.pkl')
-
-# Mapping for 'Academic Pressure' categories
-pressure_mapping = {'Low': 0, 'Medium': 1, 'High': 2}
 
 # Streamlit App for prediction
 st.title("Predict Depression Based on Academic Pressure")
 
-# Academic Pressure input (User selects High, Medium, Low)
+# Input from user
 academic_pressure = st.selectbox("Select Academic Pressure Level", ["Low", "Medium", "High"])
 
-# Prepare the input data for prediction
+# Map categorical input
+pressure_mapping = {"Low": 0, "Medium": 1, "High": 2}
+pressure_value = pressure_mapping[academic_pressure]
+
+# Prepare input dataframe
+input_data = pd.DataFrame([[pressure_value]], columns=["Academic Pressure"])
+
+# Apply preprocessing
+try:
+    input_data["Academic Pressure"] = preprocessor.transform(input_data["Academic Pressure"].values.reshape(-1, 1))
+except:
+    le = LabelEncoder()
+    le.fit(["Low", "Medium", "High"])
+    input_data["Academic Pressure"] = le.transform([academic_pressure])
+
+# Predict on button click
 if st.button("Predict Depression"):
-    # Map the selected value to the corresponding numeric label (Low -> 0, Medium -> 1, High -> 2)
-    pressure_value = pressure_mapping[academic_pressure]
+    proba = model.predict_proba(input_data)[0]
+    st.subheader("Prediction Probabilities")
+    st.write(f"No Depression: {proba[0]:.2f}")
+    st.write(f"Depression: {proba[1]:.2f}")
 
-    # Input data (now focusing only on 'Academic Pressure')
-    input_data = pd.DataFrame([[pressure_value]], columns=["Academic Pressure"])
+    # Slider to customize threshold
+    threshold = st.slider("Prediction Threshold", 0.0, 1.0, 0.5, 0.01)
 
-    # Apply preprocessing to the input data (apply transformations such as encoding if needed)
-    try:
-        # Apply the preprocessor transformation (e.g., LabelEncoding) if preprocessor was fitted with data
-        input_data["Academic Pressure"] = preprocessor.transform(input_data["Academic Pressure"].values.reshape(-1, 1))
-    except ValueError:
-        # If there's an issue (e.g., LabelEncoder isn't available in the preprocessor), use LabelEncoder directly
-        encoder = LabelEncoder()
-        encoder.fit(input_data["Academic Pressure"].unique())
-        input_data["Academic Pressure"] = encoder.transform(input_data["Academic Pressure"])
-
-    # Make the prediction using the loaded model
-    prediction = m.predict(input_data)[0]
-
-    # Display the result
-    st.header("Prediction Result")
-    if prediction == 1:
-        st.write("**Depression Predicted**")
+    st.subheader("Prediction Result")
+    if proba[1] > threshold:
+        st.success("🧠 **Depression Predicted**")
     else:
-        st.write("**No Depression Predicted**")
+        st.info("🙂 **No Depression Predicted**")
