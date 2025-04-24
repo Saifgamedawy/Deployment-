@@ -91,8 +91,8 @@ st.subheader("Exploratory Data Analysis (EDA)")
 st.plotly_chart(fig, use_container_width=True)
 
 # Load the pre-trained model and preprocessor
-m = joblib.load('/Users/saifgamed/Desktop/student_performance_model2.pkl')
-preprocessor = joblib.load('/Users/saifgamed/Desktop/preprocessor2.pkl')
+m = joblib.load('student_performance_model2.pkl')
+preprocessor = joblib.load('preprocessor2.pkl')
 
 # Mapping for 'Academic Pressure' categories
 pressure_mapping = {'Low': 0, 'Medium': 1, 'High': 2}
