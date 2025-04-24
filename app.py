@@ -28,7 +28,7 @@ def load_data_and_create_figure():
                         vertical_spacing=0.15,
                         horizontal_spacing=0.15)
 
-    # Father Degree vs Final Score
+    # Father Degree vs Final Score (Box plot)
     fig.add_trace(
         go.Box(
             x=father_education,
@@ -109,10 +109,9 @@ if st.button("Predict Depression"):
     pressure_value = pressure_mapping[academic_pressure]
 
     # Create the input DataFrame
-    input_data = pd.DataFrame([[pressure_value]],
-                              columns=['Academic Pressure'])
+    input_data = pd.DataFrame([[pressure_value]], columns=["Academic Pressure"])
 
-    # Preprocess the input data (LabelEncoder applied if needed)
+    # Preprocess the input data (apply LabelEncoder or other transformations as needed)
     for col in input_data.columns:
         try:
             input_data[col] = preprocessor.transform(input_data[col].values.reshape(-1, 1))
