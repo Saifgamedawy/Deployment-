@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from sklearn.preprocessing import LabelEncoder
 
+
 @st.cache_data
 def load_data_and_create_figure():
     # Load the datasets
@@ -78,6 +79,7 @@ def load_data_and_create_figure():
 
     return performance, fig
 
+
 # Load data and create the figure
 performance, fig = load_data_and_create_figure()
 
@@ -120,15 +122,16 @@ if st.button("Predict Depression"):
         input_data["Academic Pressure"] = encoder.transform(input_data["Academic Pressure"])
 
     # Make the prediction using the loaded model
-    prediction = m.predict(input_data)[0]
-    prediction_prob = m.predict_proba(input_data)[0][1]  # Get the probability for 'Depression' (class 1)
+    prediction_prob = m.predict_proba(input_data)[0][1]
 
     # Display the result
     st.header("Prediction Result")
-    if prediction == 1:
+    
+    # Use 0.50 as the threshold for prediction
+    if prediction_prob >= 0.5:
         st.write("**Depression Predicted**")
     else:
         st.write("**No Depression Predicted**")
 
-    # Display the probability
-    st.write(f"**Probability of Depression: {prediction_prob:.2f}**")
+    # Display the probability of depression
+    st.write(f"Probability of Depression: {prediction_prob:.2f}")
