@@ -80,42 +80,46 @@ st.subheader("Exploratory Data Analysis (EDA)")
 st.plotly_chart(fig, use_container_width=True)
 
 # Load trained model and preprocessor
-model = joblib.load('student_performance_model2.pkl')
+mm = joblib.load('student_performance_model2.pkl')
 preprocessor = joblib.load('preprocessor2.pkl')
+
+# Mapping for 'Academic Pressure' categories
+pressure_mapping = {'Low': 0, 'Medium': 1, 'High': 2}
 
 # Streamlit App for prediction
 st.title("Predict Depression Based on Academic Pressure")
 
-# Input from user
+# Academic Pressure input (User selects High, Medium, Low)
 academic_pressure = st.selectbox("Select Academic Pressure Level", ["Low", "Medium", "High"])
 
-# Map categorical input
-pressure_mapping = {"Low": 0, "Medium": 1, "High": 2}
-pressure_value = pressure_mapping[academic_pressure]
-
-# Prepare input dataframe
-input_data = pd.DataFrame([[pressure_value]], columns=["Academic Pressure"])
-
-# Apply preprocessing
-try:
-    input_data["Academic Pressure"] = preprocessor.transform(input_data["Academic Pressure"].values.reshape(-1, 1))
-except:
-    le = LabelEncoder()
-    le.fit(["Low", "Medium", "High"])
-    input_data["Academic Pressure"] = le.transform([academic_pressure])
-
-# Predict on button click
+# Prepare the input data for prediction
 if st.button("Predict Depression"):
-    proba = model.predict_proba(input_data)[0]
-    st.subheader("Prediction Probabilities")
-    st.write(f"No Depression: {proba[0]:.2f}")
-    st.write(f"Depression: {proba[1]:.2f}")
+    # Map the selected value to the corresponding numeric label (Low -> 0, Medium -> 1, High -> 2)
+    pressure_value = pressure_mapping[academic_pressure]
 
-    # Slider to customize threshold
-    threshold = st.slider("Prediction Threshold", 0.0, 1.0, 0.5, 0.01)
+    # Input data (now focusing only on 'Academic Pressure')
+    input_data = pd.DataFrame([[pressure_value]], columns=["Academic Pressure"])
 
-    st.subheader("Prediction Result")
-    if proba[1] > threshold:
-        st.success("🧠 **Depression Predicted**")
+    # Apply preprocessing to the input data (apply transformations such as encoding if needed)
+    try:
+        # Apply the preprocessor transformation (e.g., LabelEncoding) if preprocessor was fitted with data
+        input_data["Academic Pressure"] = preprocessor.transform(input_data["Academic Pressure"].values.reshape(-1, 1))
+    except ValueError:
+        # If there's an issue (e.g., LabelEncoder isn't available in the preprocessor), use LabelEncoder directly
+        encoder = LabelEncoder()
+        encoder.fit(input_data["Academic Pressure"].unique())
+        input_data["Academic Pressure"] = encoder.transform(input_data["Academic Pressure"])
+
+    # Make the prediction using the loaded model
+    prediction = m.predict(input_data)[0]
+    prediction_prob = m.predict_proba(input_data)[0][1]  # Get the probability for 'Depression' (class 1)
+
+    # Display the result
+    st.header("Prediction Result")
+    if prediction == 1:
+        st.write("**Depression Predicted**")
     else:
-        st.info("🙂 **No Depression Predicted**")
+        st.write("**No Depression Predicted**")
+
+    # Display the probability
+    st.write(f"**Probability of Depression: {prediction_prob:.2f}**")
