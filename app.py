@@ -108,8 +108,8 @@ if st.button("Predict Depression"):
     # Map the selected value to the corresponding numeric label (Low -> 0, Medium -> 1, High -> 2)
     pressure_value = pressure_mapping[academic_pressure]
 
-    # Create the input DataFrame
-    input_data = pd.DataFrame([[pressure_value]], columns=["Academic Pressure"])
+    # Include 'Study Satisfaction' (or other features) in your input data
+    input_data = pd.DataFrame([[pressure_value, 0]], columns=["Academic Pressure", "Study Satisfaction"])  # Default Study Satisfaction to 0
 
     # Preprocess the input data (apply LabelEncoder or other transformations as needed)
     for col in input_data.columns:
