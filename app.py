@@ -90,26 +90,32 @@ st.subheader("Exploratory Data Analysis (EDA)")
 # Display the Plotly figure
 st.plotly_chart(fig, use_container_width=True)
 
-# Load the saved model and preprocessor
+# Load the pre-trained model and preprocessor
 m = joblib.load('student_performance_model2.pkl')
 preprocessor = joblib.load('preprocessor2.pkl')
 
-# Input section for predictions
-st.subheader("Model Prediction")
+# Mapping for 'Academic Pressure' categories
+pressure_mapping = {'Low': 0, 'Medium': 1, 'High': 2}
 
-# Input slider for Academic Pressure only
-academic_pressure = st.slider("Select Academic Pressure", min_value=0, max_value=10, value=5, step=1)
+# Streamlit App for prediction
+st.title("Predict Depression Based on Academic Pressure")
 
-# Prediction button and logic
+# Academic Pressure input (User selects High, Medium, Low)
+academic_pressure = st.selectbox("Select Academic Pressure Level", ["Low", "Medium", "High"])
+
+# Prepare the input data for prediction
 if st.button("Predict Depression"):
-    # Prepare the input data for prediction (only Academic Pressure as feature)
-    input_data = pd.DataFrame([[academic_pressure]],
+    # Map the selected value to the corresponding numeric label (Low -> 0, Medium -> 1, High -> 2)
+    pressure_value = pressure_mapping[academic_pressure]
+
+    # Create the input DataFrame
+    input_data = pd.DataFrame([[pressure_value]],
                               columns=['Academic Pressure'])
 
-    # Preprocess input data using the preprocessor
+    # Preprocess the input data (LabelEncoder applied if needed)
     for col in input_data.columns:
         try:
-            input_data[col] = preprocessor.transform(input_data[col])
+            input_data[col] = preprocessor.transform(input_data[col].values.reshape(-1, 1))
         except ValueError:
             encoder = LabelEncoder()
             encoder.fit(input_data[col].unique())
@@ -118,7 +124,7 @@ if st.button("Predict Depression"):
     # Make the prediction using the loaded model
     prediction = m.predict(input_data)[0]
 
-    # Display the prediction result
+    # Display the result
     st.header("Prediction Result")
     if prediction == 1:
         st.write("**Depression Predicted**")
