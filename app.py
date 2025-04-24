@@ -11,7 +11,7 @@ from sklearn.preprocessing import LabelEncoder
 def load_data_and_create_figure():
     # Load the datasets
     reviews = pd.read_csv("normalized_reviews.csv")
-    depression = pd.read_csv("student_depression_normalized.csv")
+    depression = pd.read_csv("student_depression_transformed.csv")
     performance = pd.read_csv("studperlt2_normalized.csv")
 
     # Extract relevant columns
