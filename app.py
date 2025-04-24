@@ -18,15 +18,13 @@ def load_data_and_create_figure():
     final_score = performance['Final Score'].dropna()
     father_education = performance['Father Degree'].dropna()
     academic_pressure = depression['Academic Pressure'].dropna()
-    cgpa = depression['CGPA'].dropna()
     satisfaction = reviews['Sentiment Score'].dropna()
 
     # Create the figure with multiple subplots
     fig = make_subplots(rows=2, cols=2, 
                         subplot_titles=('Father Degree vs Final Score', 
-                                        'Academic Pressure vs CGPA', 
-                                        'Online Learning Satisfaction', 
-                                        'Academic Pressure vs Final Score'),
+                                        'Academic Pressure vs Final Score', 
+                                        'Online Learning Satisfaction'),
                         vertical_spacing=0.15,
                         horizontal_spacing=0.15)
 
@@ -44,14 +42,14 @@ def load_data_and_create_figure():
         row=1, col=1
     )
 
-    # Academic Pressure vs CGPA (Scatter plot)
+    # Academic Pressure vs Final Score (Scatter plot)
     fig.add_trace(
         go.Scatter(
             x=academic_pressure,
-            y=cgpa,
+            y=final_score,
             mode='markers',
-            marker=dict(color='blue', opacity=0.5),
-            name='Academic Pressure vs CGPA'
+            marker=dict(color='purple', opacity=0.5),
+            name='Academic Pressure vs Final Score'
         ),
         row=1, col=2
     )
@@ -67,18 +65,6 @@ def load_data_and_create_figure():
             opacity=0.7
         ),
         row=2, col=1
-    )
-
-    # Academic Pressure vs Final Score (Scatter plot for a direct relationship)
-    fig.add_trace(
-        go.Scatter(
-            x=academic_pressure,
-            y=final_score,
-            mode='markers',
-            marker=dict(color='purple', opacity=0.5),
-            name='Academic Pressure vs Final Score'
-        ),
-        row=2, col=2
     )
 
     # Update layout for better visualization
@@ -111,14 +97,14 @@ preprocessor = joblib.load('preprocessor2.pkl')
 # Input section for predictions
 st.subheader("Model Prediction")
 
+# Input slider for Academic Pressure only
 academic_pressure = st.slider("Select Academic Pressure", min_value=0, max_value=10, value=5, step=1)
-cgpa = st.slider("Select CGPA", min_value=0.0, max_value=10.0, value=7.0, step=0.1)
 
 # Prediction button and logic
 if st.button("Predict Depression"):
-    # Prepare the input data for prediction
-    input_data = pd.DataFrame([[academic_pressure, cgpa]],
-                              columns=['Academic Pressure', 'CGPA'])
+    # Prepare the input data for prediction (only Academic Pressure as feature)
+    input_data = pd.DataFrame([[academic_pressure]],
+                              columns=['Academic Pressure'])
 
     # Preprocess input data using the preprocessor
     for col in input_data.columns:
