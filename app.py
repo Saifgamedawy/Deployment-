@@ -9,28 +9,28 @@ from sklearn.preprocessing import LabelEncoder
 
 @st.cache_data
 def load_data_and_create_figure():
-
+    # Load the datasets
     reviews = pd.read_csv("normalized_reviews.csv")
     depression = pd.read_csv("student_depression_normalized.csv")
     performance = pd.read_csv("studperlt2_normalized.csv")
 
-
+    # Extract relevant columns
     final_score = performance['Final Score'].dropna()
     father_education = performance['Father Degree'].dropna()
     academic_pressure = depression['Academic Pressure'].dropna()
     cgpa = depression['CGPA'].dropna()
     satisfaction = reviews['Sentiment Score'].dropna()
 
-
+    # Create the figure with multiple subplots
     fig = make_subplots(rows=2, cols=2, 
                         subplot_titles=('Father Degree vs Final Score', 
                                         'Academic Pressure vs CGPA', 
                                         'Online Learning Satisfaction', 
-                                        'Correlation Matrix'),
+                                        'Academic Pressure vs Final Score'),
                         vertical_spacing=0.15,
                         horizontal_spacing=0.15)
 
-  
+    # Father Degree vs Final Score
     fig.add_trace(
         go.Box(
             x=father_education,
@@ -44,7 +44,7 @@ def load_data_and_create_figure():
         row=1, col=1
     )
 
-
+    # Academic Pressure vs CGPA (Scatter plot)
     fig.add_trace(
         go.Scatter(
             x=academic_pressure,
@@ -56,7 +56,7 @@ def load_data_and_create_figure():
         row=1, col=2
     )
 
-   
+    # Online Learning Satisfaction (Histogram)
     fig.add_trace(
         go.Histogram(
             x=satisfaction,
@@ -69,22 +69,19 @@ def load_data_and_create_figure():
         row=2, col=1
     )
 
-   
-    corr_matrix = performance.select_dtypes(include=[np.number]).corr()
+    # Academic Pressure vs Final Score (Scatter plot for a direct relationship)
     fig.add_trace(
-        go.Heatmap(
-            z=corr_matrix.values,
-            x=corr_matrix.columns,
-            y=corr_matrix.columns,
-            colorscale='RdBu',
-            text=corr_matrix.values.round(2),
-            texttemplate="%{text}",
-            textfont={"size": 10},
-            colorbar=dict(len=0.45, y=0.21, yanchor='middle')
+        go.Scatter(
+            x=academic_pressure,
+            y=final_score,
+            mode='markers',
+            marker=dict(color='purple', opacity=0.5),
+            name='Academic Pressure vs Final Score'
         ),
         row=2, col=2
     )
 
+    # Update layout for better visualization
     fig.update_layout(
         height=1200,
         width=1200,
@@ -97,39 +94,47 @@ def load_data_and_create_figure():
     return performance, fig
 
 
+# Load data and create the figure
 performance, fig = load_data_and_create_figure()
 
-
+# Display the title and description of the app
 st.title("Student Performance Analysis and Online Learning Insights")
 st.subheader("Exploratory Data Analysis (EDA)")
+
+# Display the Plotly figure
 st.plotly_chart(fig, use_container_width=True)
 
-
+# Load the saved model and preprocessor
 m = joblib.load('student_performance_model2.pkl')
 preprocessor = joblib.load('preprocessor2.pkl')
 
-
+# Input section for predictions
 st.subheader("Model Prediction")
 
-father_degree = st.selectbox("Select Father's Degree", ["High School", "Bachelor", "No Degree", "PhD", "Master"])
-mother_degree = st.selectbox("Select Mother's Degree", ["High School", "Bachelor", "No Degree", "PhD", "Master"])
-education_type = st.selectbox("Select Education Type", ["National", "Private", "International"])
+academic_pressure = st.slider("Select Academic Pressure", min_value=0, max_value=10, value=5, step=1)
+cgpa = st.slider("Select CGPA", min_value=0.0, max_value=10.0, value=7.0, step=0.1)
 
-if st.button("Predict Performance"):
+# Prediction button and logic
+if st.button("Predict Depression"):
+    # Prepare the input data for prediction
+    input_data = pd.DataFrame([[academic_pressure, cgpa]],
+                              columns=['Academic Pressure', 'CGPA'])
 
-    input_data = pd.DataFrame([[mother_degree, father_degree, education_type]],
-                              columns=['Mother Degree', 'Father Degree', 'Education Type'])
-
+    # Preprocess input data using the preprocessor
     for col in input_data.columns:
         try:
             input_data[col] = preprocessor.transform(input_data[col])
         except ValueError:
-    
             encoder = LabelEncoder()
             encoder.fit(input_data[col].unique())
             input_data[col] = encoder.transform(input_data[col])
 
+    # Make the prediction using the loaded model
     prediction = m.predict(input_data)[0]
 
+    # Display the prediction result
     st.header("Prediction Result")
-    st.write(f"Predicted Final Score: **{prediction:.2f}**")
+    if prediction == 1:
+        st.write("**Depression Predicted**")
+    else:
+        st.write("**No Depression Predicted**")
