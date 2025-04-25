@@ -6,7 +6,7 @@ from plotly.subplots import make_subplots
 from sklearn.preprocessing import LabelEncoder
 
 @st.cache_data
-def load_data_and_create_figure():
+def load_data_and_create_figures():
     reviews = pd.read_csv("normalized_reviews.csv")
     depression = pd.read_csv("student_depression_transformed.csv")
     performance = pd.read_csv("studperlt2_normalized.csv")
@@ -17,79 +17,71 @@ def load_data_and_create_figure():
     academic_pressure = depression['Academic Pressure'].dropna()
     satisfaction = reviews['Sentiment Score'].dropna()
 
-    # Subplot for various visualizations
-    fig = make_subplots(
-        rows=2, cols=2, 
-        subplot_titles=('Final Score by Parental Education', 
-                        'Final Score by Educational System', 
-                        'Distribution of Depression Levels by Academic Pressure'),
-        vertical_spacing=0.15,
-        horizontal_spacing=0.15
-    )
-
-    # Bar plot for Parental Education vs Final Score
-    fig.add_trace(
-        go.Bar(
+    # Create individual figures for each tab
+    fig1 = go.Figure(
+        data=[go.Bar(
             x=father_education,
             y=final_score,
             name='Final Score by Parental Education',
             marker=dict(color='orange'),
             opacity=0.7
-        ),
-        row=1, col=1
+        )],
+        layout=go.Layout(
+            title="Final Score vs Parental Education",
+            xaxis_title="Parental Education",
+            yaxis_title="Final Score"
+        )
     )
 
-    # Bar plot for Education Type vs Final Score
-    fig.add_trace(
-        go.Bar(
+    fig2 = go.Figure(
+        data=[go.Bar(
             x=education_type,
             y=final_score,
             name='Final Score by Educational System',
             marker=dict(color='green'),
             opacity=0.7
-        ),
-        row=1, col=2
+        )],
+        layout=go.Layout(
+            title="Final Score vs Educational System",
+            xaxis_title="Educational System",
+            yaxis_title="Final Score"
+        )
     )
 
-    # Count plot for Academic Pressure vs Depression Level
-    fig.add_trace(
-        go.Bar(
+    fig3 = go.Figure(
+        data=[go.Bar(
             x=academic_pressure,
             y=depression['Depression'].value_counts().sort_index(),
             name='Depression Levels by Academic Pressure',
             marker=dict(color='purple'),
             opacity=0.7
-        ),
-        row=2, col=1
+        )],
+        layout=go.Layout(
+            title="Depression Levels by Academic Pressure",
+            xaxis_title="Academic Pressure",
+            yaxis_title="Count"
+        )
     )
 
-    # Sentiment Distribution Bar Plot
-    sentiment_counts = reviews['Sentiment'].value_counts().reset_index()
-    sentiment_counts.columns = ['Sentiment', 'Count']
-    fig.add_trace(
-        go.Bar(
-            x=sentiment_counts['Sentiment'],
-            y=sentiment_counts['Count'],
+    fig4 = go.Figure(
+        data=[go.Bar(
+            x=satisfaction,
+            y=reviews['Sentiment'].value_counts(),
             name='Student Sentiment',
             marker=dict(color='blue'),
             opacity=0.7
-        ),
-        row=2, col=2
+        )],
+        layout=go.Layout(
+            title="Student Sentiment Distribution",
+            xaxis_title="Sentiment",
+            yaxis_title="Count"
+        )
     )
 
-    fig.update_layout(
-        height=1200,
-        width=1200,
-        title_text="Student Performance and Online Learning Insights",
-        title_x=0.5,
-        showlegend=True,
-        barmode='group'
-    )
+    return fig1, fig2, fig3, fig4
 
-    return performance, fig
-
-# Load data and create the figure
-performance, fig = load_data_and_create_figure()
+# Load data and create the figures
+fig1, fig2, fig3, fig4 = load_data_and_create_figures()
 
 # Display the title and description of the app
 st.title("Student Performance Analysis and Online Learning Insights")
@@ -106,19 +98,19 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 
 # Tab 1: Parental Education vs Final Score
 with tab1:
-    st.plotly_chart(fig, use_container_width=True, key="fig_1")  # Unique key for tab 1
+    st.plotly_chart(fig1, use_container_width=True, key="fig_1")  # Display only fig1
 
 # Tab 2: Educational System vs Final Score
 with tab2:
-    st.plotly_chart(fig, use_container_width=True, key="fig_2")  # Unique key for tab 2
+    st.plotly_chart(fig2, use_container_width=True, key="fig_2")  # Display only fig2
 
 # Tab 3: Depression Levels by Academic Pressure
 with tab3:
-    st.plotly_chart(fig, use_container_width=True, key="fig_3")  # Unique key for tab 3
+    st.plotly_chart(fig3, use_container_width=True, key="fig_3")  # Display only fig3
 
 # Tab 4: Student Sentiment
 with tab4:
-    st.plotly_chart(fig, use_container_width=True, key="fig_4")  # Unique key for tab 4
+    st.plotly_chart(fig4, use_container_width=True, key="fig_4")  # Display only fig4
 
 # Tab 5: Predict Depression based on Academic Pressure
 with tab5:
