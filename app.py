@@ -1,7 +1,6 @@
 import streamlit as st
 import joblib
 import pandas as pd
-import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from sklearn.preprocessing import LabelEncoder
@@ -18,6 +17,7 @@ def load_data_and_create_figure():
     academic_pressure = depression['Academic Pressure'].dropna()
     satisfaction = reviews['Sentiment Score'].dropna()
 
+    # Subplot for various visualizations
     fig = make_subplots(
         rows=2, cols=2, 
         subplot_titles=('Final Score by Parental Education', 
@@ -77,7 +77,6 @@ def load_data_and_create_figure():
         row=2, col=2
     )
 
-    # Update layout for aesthetics
     fig.update_layout(
         height=1200,
         width=1200,
@@ -95,7 +94,24 @@ performance, fig = load_data_and_create_figure()
 # Display the title and description of the app
 st.title("Student Performance Analysis and Online Learning Insights")
 st.subheader("Exploratory Data Analysis (EDA)")
-st.plotly_chart(fig, use_container_width=True)
+
+# Create tabs for each visualization
+tab1, tab2, tab3, tab4 = st.tabs(["Parental Education vs Final Score", 
+                                  "Educational System vs Final Score", 
+                                  "Depression Levels by Academic Pressure", 
+                                  "Student Sentiment"])
+
+with tab1:
+    st.plotly_chart(fig['data'][0], use_container_width=True)  # First subplot
+
+with tab2:
+    st.plotly_chart(fig['data'][1], use_container_width=True)  # Second subplot
+
+with tab3:
+    st.plotly_chart(fig['data'][2], use_container_width=True)  # Third subplot
+
+with tab4:
+    st.plotly_chart(fig['data'][3], use_container_width=True)  # Fourth subplot
 
 # Load trained model and preprocessor
 model = joblib.load('student_performance_model2.pkl')
