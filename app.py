@@ -102,16 +102,16 @@ tab1, tab2, tab3, tab4 = st.tabs(["Parental Education vs Final Score",
                                   "Student Sentiment"])
 
 with tab1:
-    st.plotly_chart(fig['data'][0], use_container_width=True)  # First subplot
+    st.plotly_chart(fig, use_container_width=True)  # Plot the entire figure
 
 with tab2:
-    st.plotly_chart(fig['data'][1], use_container_width=True)  # Second subplot
+    st.plotly_chart(fig, use_container_width=True)  # Plot the entire figure
 
 with tab3:
-    st.plotly_chart(fig['data'][2], use_container_width=True)  # Third subplot
+    st.plotly_chart(fig, use_container_width=True)  # Plot the entire figure
 
 with tab4:
-    st.plotly_chart(fig['data'][3], use_container_width=True)  # Fourth subplot
+    st.plotly_chart(fig, use_container_width=True)  # Plot the entire figure
 
 # Load trained model and preprocessor
 model = joblib.load('student_performance_model2.pkl')
