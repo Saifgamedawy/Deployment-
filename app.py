@@ -1,69 +1,91 @@
 import streamlit as st
-import joblib
 import pandas as pd
-import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from sklearn.preprocessing import LabelEncoder
 
 @st.cache_data
 def load_data_and_create_figure():
+    # Load datasets
     reviews = pd.read_csv("normalized_reviews.csv")
     depression = pd.read_csv("student_depression_transformed.csv")
     performance = pd.read_csv("studperlt2_normalized.csv")
 
+    # Create the combined 'Parental Education' column
+    performance['Parental Education'] = performance['Mother Degree'] + " " + performance['Father Degree']
+    
+    # Subset data for visualizations
     final_score = performance['Final Score'].dropna()
-    father_education = performance['Father Degree'].dropna()
+    parental_education = performance['Parental Education'].dropna()
+    education_type = performance['Education Type'].dropna()
     academic_pressure = depression['Academic Pressure'].dropna()
-    satisfaction = reviews['Sentiment Score'].dropna()
+    depression_level = depression['Depression'].dropna()
+    sentiment = reviews['Sentiment'].dropna()
 
-    fig = make_subplots(rows=2, cols=2, 
-                        subplot_titles=('Father Degree vs Final Score', 
-                                        'Academic Pressure vs Final Score', 
-                                        'Online Learning Satisfaction'),
-                        vertical_spacing=0.15,
-                        horizontal_spacing=0.15)
+    # Create subplots
+    fig = make_subplots(
+        rows=2, cols=2, 
+        subplot_titles=('Final Score by Parental Education', 
+                        'Final Score by Educational System', 
+                        'Distribution of Depression Levels by Academic Pressure'),
+        vertical_spacing=0.15,
+        horizontal_spacing=0.15
+    )
 
+    # Bar plot for Parental Education vs Final Score
     fig.add_trace(
-        go.Box(
-            x=father_education,
+        go.Bar(
+            x=parental_education,
             y=final_score,
-            name='Father Degree vs Final Score',
-            boxpoints='all',
-            line=dict(color='orange'),
-            fillcolor='rgba(255, 165, 0, 0.5)',
+            name='Parental Education vs Final Score',
+            marker=dict(color='orange'),
             opacity=0.7
         ),
         row=1, col=1
     )
 
+    # Bar plot for Education Type vs Final Score
     fig.add_trace(
-        go.Scatter(
-            x=academic_pressure,
+        go.Bar(
+            x=education_type,
             y=final_score,
-            mode='markers',
-            marker=dict(color='purple', opacity=0.5),
-            name='Academic Pressure vs Final Score'
+            name='Education Type vs Final Score',
+            marker=dict(color='green'),
+            opacity=0.7
         ),
         row=1, col=2
     )
 
+    # Count plot for Depression Levels by Academic Pressure
     fig.add_trace(
-        go.Histogram(
-            x=satisfaction,
-            nbinsx=20,
-            histnorm='percent',
-            name='Online Learning Satisfaction',
-            marker=dict(color='green'),
+        go.Bar(
+            x=academic_pressure,
+            y=depression_level,
+            name='Academic Pressure vs Depression Level',
+            marker=dict(color='purple'),
             opacity=0.7
         ),
         row=2, col=1
     )
 
+    # Bar plot for Sentiment of Reviews
+    sentiment_counts = reviews['Sentiment'].value_counts().reset_index()
+    sentiment_counts.columns = ['Sentiment', 'Count']
+    fig.add_trace(
+        go.Bar(
+            x=sentiment_counts['Sentiment'],
+            y=sentiment_counts['Count'],
+            name='Student Sentiment',
+            marker=dict(color='blue'),
+            opacity=0.7
+        ),
+        row=2, col=2
+    )
+
+    # Update layout for aesthetics
     fig.update_layout(
         height=1200,
         width=1200,
-        title_text="Student Performance and Online Learning Analysis",
+        title_text="Student Performance and Online Learning Insights",
         title_x=0.5,
         showlegend=True,
         barmode='group'
