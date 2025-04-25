@@ -106,19 +106,19 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 
 # Tab 1: Parental Education vs Final Score
 with tab1:
-    st.plotly_chart(fig, use_container_width=True)  # Plot the entire figure
+    st.plotly_chart(fig, use_container_width=True, key="fig_1")  # Unique key for tab 1
 
 # Tab 2: Educational System vs Final Score
 with tab2:
-    st.plotly_chart(fig, use_container_width=True)  # Plot the entire figure
+    st.plotly_chart(fig, use_container_width=True, key="fig_2")  # Unique key for tab 2
 
 # Tab 3: Depression Levels by Academic Pressure
 with tab3:
-    st.plotly_chart(fig, use_container_width=True)  # Plot the entire figure
+    st.plotly_chart(fig, use_container_width=True, key="fig_3")  # Unique key for tab 3
 
 # Tab 4: Student Sentiment
 with tab4:
-    st.plotly_chart(fig, use_container_width=True)  # Plot the entire figure
+    st.plotly_chart(fig, use_container_width=True, key="fig_4")  # Unique key for tab 4
 
 # Tab 5: Predict Depression based on Academic Pressure
 with tab5:
