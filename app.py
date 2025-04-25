@@ -22,8 +22,7 @@ def load_data_and_create_figure():
         rows=2, cols=2, 
         subplot_titles=('Final Score by Parental Education', 
                         'Final Score by Educational System', 
-                        'Distribution of Depression Levels by Academic Pressure',
-                        'Student Sentiment'),
+                        'Distribution of Depression Levels by Academic Pressure'),
         vertical_spacing=0.15,
         horizontal_spacing=0.15
     )
@@ -97,57 +96,66 @@ st.title("Student Performance Analysis and Online Learning Insights")
 st.subheader("Exploratory Data Analysis (EDA)")
 
 # Create tabs for each visualization
-tab1, tab2, tab3, tab4 = st.tabs(["Parental Education vs Final Score", 
-                                  "Educational System vs Final Score", 
-                                  "Depression Levels by Academic Pressure", 
-                                  "Student Sentiment"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    "Parental Education vs Final Score", 
+    "Educational System vs Final Score", 
+    "Depression Levels by Academic Pressure", 
+    "Student Sentiment",
+    "Predict Depression"
+])
 
+# Tab 1: Parental Education vs Final Score
 with tab1:
-    st.plotly_chart(fig['data'][0], use_container_width=True)  # Display specific trace
+    st.plotly_chart(fig, use_container_width=True)  # Plot the entire figure
 
+# Tab 2: Educational System vs Final Score
 with tab2:
-    st.plotly_chart(fig['data'][1], use_container_width=True)  # Display specific trace
+    st.plotly_chart(fig, use_container_width=True)  # Plot the entire figure
 
+# Tab 3: Depression Levels by Academic Pressure
 with tab3:
-    st.plotly_chart(fig['data'][2], use_container_width=True)  # Display specific trace
+    st.plotly_chart(fig, use_container_width=True)  # Plot the entire figure
 
+# Tab 4: Student Sentiment
 with tab4:
-    st.plotly_chart(fig['data'][3], use_container_width=True)  # Display specific trace
+    st.plotly_chart(fig, use_container_width=True)  # Plot the entire figure
 
-# Load trained model and preprocessor
-model = joblib.load('student_performance_model2.pkl')
-preprocessor = joblib.load('preprocessor2.pkl')
+# Tab 5: Predict Depression based on Academic Pressure
+with tab5:
+    # Load trained model and preprocessor
+    model = joblib.load('student_performance_model2.pkl')
+    preprocessor = joblib.load('preprocessor2.pkl')
 
-# Streamlit App for prediction
-st.title("Predict Depression Based on Academic Pressure")
+    # Streamlit App for prediction
+    st.title("Predict Depression Based on Academic Pressure")
 
-# Input from user
-academic_pressure = st.selectbox("Select Academic Pressure Level", ["Low", "Medium", "High"])
+    # Input from user
+    academic_pressure = st.selectbox("Select Academic Pressure Level", ["Low", "Medium", "High"])
 
-# Map categorical input to numeric values
-pressure_mapping = {"Low": 0, "Medium": 1, "High": 2}
-pressure_value = pressure_mapping[academic_pressure]
+    # Map categorical input
+    pressure_mapping = {"Low": 0, "Medium": 1, "High": 2}
+    pressure_value = pressure_mapping[academic_pressure]
 
-# Prepare input dataframe
-input_data = pd.DataFrame([[pressure_value]], columns=["Academic Pressure"])
+    # Prepare input dataframe
+    input_data = pd.DataFrame([[pressure_value]], columns=["Academic Pressure"])
 
-# Apply preprocessing
-try:
-    input_data["Academic Pressure"] = preprocessor.transform(input_data[["Academic Pressure"]])
-except:
-    # Handle LabelEncoder if the preprocessor is different
-    le = LabelEncoder()
-    input_data["Academic Pressure"] = le.fit_transform([academic_pressure])
+    # Apply preprocessing
+    try:
+        input_data["Academic Pressure"] = preprocessor.transform(input_data["Academic Pressure"].values.reshape(-1, 1))
+    except:
+        le = LabelEncoder()
+        le.fit(["Low", "Medium", "High"])
+        input_data["Academic Pressure"] = le.transform([academic_pressure])
 
-# Predict on button click
-if st.button("Predict Depression"):
-    proba = model.predict_proba(input_data)[0]
-    st.subheader("Prediction Probabilities")
-    st.write(f"No Depression: {proba[0]:.2f}")
-    st.write(f"Depression: {proba[1]:.2f}")
+    # Predict on button click
+    if st.button("Predict Depression"):
+        proba = model.predict_proba(input_data)[0]
+        st.subheader("Prediction Probabilities")
+        st.write(f"No Depression: {proba[0]:.2f}")
+        st.write(f"Depression: {proba[1]:.2f}")
 
-    # Automatically select the class with the highest probability
-    if proba[1] > proba[0]:
-        st.success("**Depression Predicted**")
-    else:
-        st.info("**No Depression Predicted**")
+        # Automatically select the class with the highest probability
+        if proba[1] > proba[0]:
+            st.success("**Depression Predicted**")
+        else:
+            st.info("**No Depression Predicted**")
