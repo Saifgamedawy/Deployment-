@@ -2,7 +2,6 @@ import streamlit as st
 import joblib
 import pandas as pd
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 from sklearn.preprocessing import LabelEncoder
 
 @st.cache_data
@@ -12,15 +11,27 @@ def load_data_and_create_figures():
     performance = pd.read_csv("studperlt2_normalized.csv")
 
     final_score = performance['Final Score'].dropna()
+
+    # Combine Father and Mother Education Level for Parental Education vs Final Score
     father_education = performance['Father Degree'].dropna()
+    mother_education = performance['Mother Degree'].dropna()
+    combined_education = father_education + " & " + mother_education
+
     education_type = performance['Education Type'].dropna()
+
+    # Academic pressure categories
     academic_pressure = depression['Academic Pressure'].dropna()
+    academic_pressure = academic_pressure.replace({1: "Low", 2: "Medium", 3: "High"})
+
+    # Sentiment scores from reviews
     satisfaction = reviews['Sentiment Score'].dropna()
 
     # Create individual figures for each tab
+
+    # Figure 1: Parental Education (Father & Mother combined) vs Final Score
     fig1 = go.Figure(
         data=[go.Bar(
-            x=father_education,
+            x=combined_education,
             y=final_score,
             name='Final Score by Parental Education',
             marker=dict(color='orange'),
@@ -28,11 +39,12 @@ def load_data_and_create_figures():
         )],
         layout=go.Layout(
             title="Final Score vs Parental Education",
-            xaxis_title="Parental Education",
+            xaxis_title="Parental Education (Father & Mother)",
             yaxis_title="Final Score"
         )
     )
 
+    # Figure 2: Educational System vs Final Score
     fig2 = go.Figure(
         data=[go.Bar(
             x=education_type,
@@ -48,6 +60,7 @@ def load_data_and_create_figures():
         )
     )
 
+    # Figure 3: Depression Levels by Academic Pressure
     fig3 = go.Figure(
         data=[go.Bar(
             x=academic_pressure,
@@ -63,6 +76,7 @@ def load_data_and_create_figures():
         )
     )
 
+    # Figure 4: Student Sentiment
     fig4 = go.Figure(
         data=[go.Bar(
             x=satisfaction,
