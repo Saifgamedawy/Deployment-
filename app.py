@@ -22,7 +22,8 @@ def load_data_and_create_figure():
         rows=2, cols=2, 
         subplot_titles=('Final Score by Parental Education', 
                         'Final Score by Educational System', 
-                        'Distribution of Depression Levels by Academic Pressure'),
+                        'Distribution of Depression Levels by Academic Pressure',
+                        'Student Sentiment'),
         vertical_spacing=0.15,
         horizontal_spacing=0.15
     )
@@ -102,16 +103,16 @@ tab1, tab2, tab3, tab4 = st.tabs(["Parental Education vs Final Score",
                                   "Student Sentiment"])
 
 with tab1:
-    st.plotly_chart(fig, use_container_width=True)  # Plot the entire figure
+    st.plotly_chart(fig['data'][0], use_container_width=True)  # Display specific trace
 
 with tab2:
-    st.plotly_chart(fig, use_container_width=True)  # Plot the entire figure
+    st.plotly_chart(fig['data'][1], use_container_width=True)  # Display specific trace
 
 with tab3:
-    st.plotly_chart(fig, use_container_width=True)  # Plot the entire figure
+    st.plotly_chart(fig['data'][2], use_container_width=True)  # Display specific trace
 
 with tab4:
-    st.plotly_chart(fig, use_container_width=True)  # Plot the entire figure
+    st.plotly_chart(fig['data'][3], use_container_width=True)  # Display specific trace
 
 # Load trained model and preprocessor
 model = joblib.load('student_performance_model2.pkl')
@@ -123,7 +124,7 @@ st.title("Predict Depression Based on Academic Pressure")
 # Input from user
 academic_pressure = st.selectbox("Select Academic Pressure Level", ["Low", "Medium", "High"])
 
-# Map categorical input
+# Map categorical input to numeric values
 pressure_mapping = {"Low": 0, "Medium": 1, "High": 2}
 pressure_value = pressure_mapping[academic_pressure]
 
@@ -132,11 +133,11 @@ input_data = pd.DataFrame([[pressure_value]], columns=["Academic Pressure"])
 
 # Apply preprocessing
 try:
-    input_data["Academic Pressure"] = preprocessor.transform(input_data["Academic Pressure"].values.reshape(-1, 1))
+    input_data["Academic Pressure"] = preprocessor.transform(input_data[["Academic Pressure"]])
 except:
+    # Handle LabelEncoder if the preprocessor is different
     le = LabelEncoder()
-    le.fit(["Low", "Medium", "High"])
-    input_data["Academic Pressure"] = le.transform([academic_pressure])
+    input_data["Academic Pressure"] = le.fit_transform([academic_pressure])
 
 # Predict on button click
 if st.button("Predict Depression"):
