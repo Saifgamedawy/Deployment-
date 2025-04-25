@@ -61,19 +61,29 @@ def load_data_and_create_figures():
     )
 
     # Figure 3: Depression Levels by Academic Pressure
-    fig3 = go.Figure(
-        data=[go.Bar(
-            x=academic_pressure,
-            y=depression['Depression'].value_counts().sort_index(),
-            name='Depression Levels by Academic Pressure',
-            marker=dict(color='purple'),
-            opacity=0.7
-        )],
-        layout=go.Layout(
-            title="Depression Levels by Academic Pressure",
-            xaxis_title="Academic Pressure",
-            yaxis_title="Count"
+    # Count depression levels per academic pressure level
+    depression_counts = depression.groupby(['Academic Pressure', 'Depression']).size().reset_index(name='Count')
+    # Replace numeric values with "Low", "Medium", "High"
+    depression_counts['Academic Pressure'] = depression_counts['Academic Pressure'].replace({1: "Low", 2: "Medium", 3: "High"})
+
+    # Create the bar chart
+    fig3 = go.Figure()
+    for level in depression_counts['Depression'].unique():
+        level_data = depression_counts[depression_counts['Depression'] == level]
+        fig3.add_trace(
+            go.Bar(
+                x=level_data['Academic Pressure'],
+                y=level_data['Count'],
+                name=f'Depression: {level}',
+                opacity=0.7
+            )
         )
+
+    fig3.update_layout(
+        title="Depression Levels by Academic Pressure",
+        xaxis_title="Academic Pressure",
+        yaxis_title="Count",
+        barmode='stack'
     )
 
     # Figure 4: Student Sentiment
