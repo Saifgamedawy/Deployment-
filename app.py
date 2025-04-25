@@ -1,27 +1,23 @@
 import streamlit as st
+import joblib
 import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from sklearn.preprocessing import LabelEncoder
 
 @st.cache_data
 def load_data_and_create_figure():
-    # Load datasets
     reviews = pd.read_csv("normalized_reviews.csv")
     depression = pd.read_csv("student_depression_transformed.csv")
     performance = pd.read_csv("studperlt2_normalized.csv")
 
-    # Create the combined 'Parental Education' column
-    performance['Parental Education'] = performance['Mother Degree'] + " " + performance['Father Degree']
-    
-    # Subset data for visualizations
     final_score = performance['Final Score'].dropna()
-    parental_education = performance['Parental Education'].dropna()
+    father_education = performance['Father Degree'].dropna()
     education_type = performance['Education Type'].dropna()
     academic_pressure = depression['Academic Pressure'].dropna()
-    depression_level = depression['Depression'].dropna()
-    sentiment = reviews['Sentiment'].dropna()
+    satisfaction = reviews['Sentiment Score'].dropna()
 
-    # Create subplots
     fig = make_subplots(
         rows=2, cols=2, 
         subplot_titles=('Final Score by Parental Education', 
@@ -34,9 +30,9 @@ def load_data_and_create_figure():
     # Bar plot for Parental Education vs Final Score
     fig.add_trace(
         go.Bar(
-            x=parental_education,
+            x=father_education,
             y=final_score,
-            name='Parental Education vs Final Score',
+            name='Final Score by Parental Education',
             marker=dict(color='orange'),
             opacity=0.7
         ),
@@ -48,26 +44,26 @@ def load_data_and_create_figure():
         go.Bar(
             x=education_type,
             y=final_score,
-            name='Education Type vs Final Score',
+            name='Final Score by Educational System',
             marker=dict(color='green'),
             opacity=0.7
         ),
         row=1, col=2
     )
 
-    # Count plot for Depression Levels by Academic Pressure
+    # Count plot for Academic Pressure vs Depression Level
     fig.add_trace(
         go.Bar(
             x=academic_pressure,
-            y=depression_level,
-            name='Academic Pressure vs Depression Level',
+            y=depression['Depression'].value_counts().sort_index(),
+            name='Depression Levels by Academic Pressure',
             marker=dict(color='purple'),
             opacity=0.7
         ),
         row=2, col=1
     )
 
-    # Bar plot for Sentiment of Reviews
+    # Sentiment Distribution Bar Plot
     sentiment_counts = reviews['Sentiment'].value_counts().reset_index()
     sentiment_counts.columns = ['Sentiment', 'Count']
     fig.add_trace(
@@ -135,6 +131,6 @@ if st.button("Predict Depression"):
 
     # Automatically select the class with the highest probability
     if proba[1] > proba[0]:
-        st.success("🧠 **Depression Predicted**")
+        st.success("**Depression Predicted**")
     else:
-        st.info("🙂 **No Depression Predicted**")
+        st.info("**No Depression Predicted**")
