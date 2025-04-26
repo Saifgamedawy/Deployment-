@@ -87,17 +87,19 @@ def load_data_and_create_figures():
     )
 
     # Figure 4: Student Sentiment
+    sentiment_counts = reviews['Sentiment'].value_counts()
+
     fig4 = go.Figure(
         data=[go.Bar(
-            x=satisfaction,
-            y=reviews['Sentiment'].value_counts(),
+            x=sentiment_counts.index,
+            y=sentiment_counts.values,
             name='Student Sentiment',
-            marker=dict(color='blue'),
+            marker=dict(color=['green', 'gray', 'red']),  # Green for Positive, Gray for Neutral, Red for Negative
             opacity=0.7
         )],
         layout=go.Layout(
             title="Student Sentiment Distribution",
-            xaxis_title="Sentiment",
+            xaxis_title="Sentiment Category",
             yaxis_title="Count"
         )
     )
