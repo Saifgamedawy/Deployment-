@@ -11,24 +11,14 @@ def load_data_and_create_figures():
     performance = pd.read_csv("studperlt2_normalized.csv")
 
     final_score = performance['Final Score'].dropna()
-
-    # Combine Father and Mother Education Level for Parental Education vs Final Score
     father_education = performance['Father Degree'].dropna()
     mother_education = performance['Mother Degree'].dropna()
     combined_education = father_education + " & " + mother_education
-
     education_type = performance['Education Type'].dropna()
-
-    # Academic pressure categories
     academic_pressure = depression['Academic Pressure'].dropna()
     academic_pressure = academic_pressure.replace({1: "Low", 2: "Medium", 3: "High"})
-
-    # Sentiment scores from reviews
     satisfaction = reviews['Sentiment Score'].dropna()
 
-    # Create individual figures for each tab
-
-    # Figure 1: Parental Education (Father & Mother combined) vs Final Score
     fig1 = go.Figure(
         data=[go.Bar(
             x=combined_education,
@@ -44,7 +34,6 @@ def load_data_and_create_figures():
         )
     )
 
-    # Figure 2: Educational System vs Final Score
     fig2 = go.Figure(
         data=[go.Bar(
             x=education_type,
@@ -60,13 +49,9 @@ def load_data_and_create_figures():
         )
     )
 
-    # Figure 3: Depression Levels by Academic Pressure
-    # Count depression levels per academic pressure level
     depression_counts = depression.groupby(['Academic Pressure', 'Depression']).size().reset_index(name='Count')
-    # Replace numeric values with "Low", "Medium", "High"
     depression_counts['Academic Pressure'] = depression_counts['Academic Pressure'].replace({1: "Low", 2: "Medium", 3: "High"})
 
-    # Create the bar chart
     fig3 = go.Figure()
     for level in depression_counts['Depression'].unique():
         level_data = depression_counts[depression_counts['Depression'] == level]
@@ -86,7 +71,6 @@ def load_data_and_create_figures():
         barmode='stack'
     )
 
-    # Figure 4: Student Sentiment
     sentiment_counts = reviews['Sentiment'].value_counts()
 
     fig4 = go.Figure(
@@ -94,7 +78,7 @@ def load_data_and_create_figures():
             x=sentiment_counts.index,
             y=sentiment_counts.values,
             name='Student Sentiment',
-            marker=dict(color=['green', 'gray', 'red']),  # Green for Positive, Gray for Neutral, Red for Negative
+            marker=dict(color=['green', 'gray', 'red']),
             opacity=0.7
         )],
         layout=go.Layout(
@@ -106,14 +90,11 @@ def load_data_and_create_figures():
 
     return fig1, fig2, fig3, fig4
 
-# Load data and create the figures
 fig1, fig2, fig3, fig4 = load_data_and_create_figures()
 
-# Display the title and description of the app
 st.title("Student Performance Analysis and Online Learning Insights")
 st.subheader("Exploratory Data Analysis (EDA)")
 
-# Create tabs for each visualization
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "Parental Education vs Final Score", 
     "Educational System vs Final Score", 
@@ -122,42 +103,47 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "Predict Depression"
 ])
 
-# Tab 1: Parental Education vs Final Score
 with tab1:
-    st.plotly_chart(fig1, use_container_width=True, key="fig_1")  # Display only fig1
+    st.plotly_chart(fig1, use_container_width=True, key="fig_1")
+    st.markdown("""
+    **Description:**  
+    This bar plot displays the final score of students based on their parental education. As we can see, there is minimal change between scores, suggesting that parental education does not have much impact on student performance.
+    """)
 
-# Tab 2: Educational System vs Final Score
 with tab2:
-    st.plotly_chart(fig2, use_container_width=True, key="fig_2")  # Display only fig2
+    st.plotly_chart(fig2, use_container_width=True, key="fig_2")
+    st.markdown("""
+    **Description:**  
+    This bar plot displays the final score of students based on their education system. As we can see, there is no significant change between scores, suggesting that the type of educational system does not have much impact on student performance.
+    """)
 
-# Tab 3: Depression Levels by Academic Pressure
 with tab3:
-    st.plotly_chart(fig3, use_container_width=True, key="fig_3")  # Display only fig3
+    st.plotly_chart(fig3, use_container_width=True, key="fig_3")
+    st.markdown("""
+    **Description:**  
+    This bar plot displays the depression levels of students based on their academic pressure. We observe significant differences, indicating that academic pressure has a strong impact on student mental health and potentially their academic performance.
+    """)
 
-# Tab 4: Student Sentiment
 with tab4:
-    st.plotly_chart(fig4, use_container_width=True, key="fig_4")  # Display only fig4
+    st.plotly_chart(fig4, use_container_width=True, key="fig_4")
+    st.markdown("""
+    **Description:**  
+    This bar plot visualizes the distribution of student sentiment toward online learning, categorized into Positive, Neutral, and Negative. The plot shows that 628 students favored online learning, followed by 331 students expressing neutral sentiment, and a small group of 41 students with negative sentiment. This suggests a generally favorable attitude towards online learning among the students.
+    """)
 
-# Tab 5: Predict Depression based on Academic Pressure
 with tab5:
-    # Load trained model and preprocessor
     model = joblib.load('student_performance_model2.pkl')
     preprocessor = joblib.load('preprocessor2.pkl')
 
-    # Streamlit App for prediction
     st.title("Predict Depression Based on Academic Pressure")
 
-    # Input from user
     academic_pressure = st.selectbox("Select Academic Pressure Level", ["Low", "Medium", "High"])
 
-    # Map categorical input
     pressure_mapping = {"Low": 0, "Medium": 1, "High": 2}
     pressure_value = pressure_mapping[academic_pressure]
 
-    # Prepare input dataframe
     input_data = pd.DataFrame([[pressure_value]], columns=["Academic Pressure"])
 
-    # Apply preprocessing
     try:
         input_data["Academic Pressure"] = preprocessor.transform(input_data["Academic Pressure"].values.reshape(-1, 1))
     except:
@@ -165,14 +151,12 @@ with tab5:
         le.fit(["Low", "Medium", "High"])
         input_data["Academic Pressure"] = le.transform([academic_pressure])
 
-    # Predict on button click
     if st.button("Predict Depression"):
         proba = model.predict_proba(input_data)[0]
         st.subheader("Prediction Probabilities")
         st.write(f"No Depression: {proba[0]:.2f}")
         st.write(f"Depression: {proba[1]:.2f}")
 
-        # Automatically select the class with the highest probability
         if proba[1] > proba[0]:
             st.success("**Depression Predicted**")
         else:
