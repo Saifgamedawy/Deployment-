@@ -93,7 +93,7 @@ def load_data_and_create_figures():
 fig1, fig2, fig3, fig4 = load_data_and_create_figures()
 
 st.title("Student Performance Analysis and Online Learning Insights")
-st.subheader("Exploratory Data Analysis (EDA)")
+st.subheader("Visualizations and Prediction Analysis")
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "Parental Education vs Final Score", 
