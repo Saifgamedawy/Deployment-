@@ -138,7 +138,7 @@ with tab5:
     academic_pressure = st.selectbox("Select Academic Pressure Level", ["Low", "Medium", "High"])
 
     le = LabelEncoder()
-    le.fit(["Low", "Medium", "High"])  # This should match the encoding used during model training
+    le.fit(["Low", "Medium", "High"])  
     pressure_value = le.transform([academic_pressure])[0]
 
     input_data = pd.DataFrame([[pressure_value]], columns=["Academic Pressure"])
