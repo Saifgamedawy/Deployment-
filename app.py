@@ -137,17 +137,12 @@ with tab5:
 
     academic_pressure = st.selectbox("Select Academic Pressure Level", ["Low", "Medium", "High"])
 
-    pressure_mapping = {"Low": 0, "Medium": 1, "High": 2}
-    pressure_value = pressure_mapping[academic_pressure]
+    le = LabelEncoder()
+    le.fit(["Low", "Medium", "High"])  # This should match the encoding used during model training
+    pressure_value = le.transform([academic_pressure])[0]
 
     input_data = pd.DataFrame([[pressure_value]], columns=["Academic Pressure"])
 
-    try:
-        input_data["Academic Pressure"] = preprocessor.transform(input_data["Academic Pressure"].values.reshape(-1, 1))
-    except:
-        le = LabelEncoder()
-        le.fit(["Low", "Medium", "High"])
-        input_data["Academic Pressure"] = le.transform([academic_pressure])
 
     if st.button("Predict Depression"):
         proba = model.predict_proba(input_data)[0]
