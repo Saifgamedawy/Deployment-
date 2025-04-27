@@ -49,8 +49,7 @@ def load_data_and_create_figures():
     )
 
     depression_counts = depression.groupby(['Academic Pressure', 'Depression']).size().reset_index(name='Count')
-    depression_counts['Academic Pressure'] = depression_counts['Academic Pressure'].replace({1: "Low", 2: "Medium", 3: "High"})
-
+    
     fig3 = go.Figure()
     for level in depression_counts['Depression'].unique():
         level_data = depression_counts[depression_counts['Depression'] == level]
