@@ -142,12 +142,7 @@ with tab5:
 
     input_data = pd.DataFrame([[pressure_value]], columns=["Academic Pressure"])
 
-    try:
-        input_data["Academic Pressure"] = preprocessor.transform(input_data["Academic Pressure"].values.reshape(-1, 1))
-    except:
-        le = LabelEncoder()
-        le.fit(["Low", "Medium", "High"])
-        input_data["Academic Pressure"] = le.transform([academic_pressure])
+    
 
     if st.button("Predict Depression"):
         proba = model.predict_proba(input_data)[0]
