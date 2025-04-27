@@ -16,7 +16,6 @@ def load_data_and_create_figures():
     combined_education = father_education + " & " + mother_education
     education_type = performance['Education Type']
     academic_pressure = depression['Academic Pressure']
-    academic_pressure = academic_pressure.replace({1: "Low", 2: "Medium", 3: "High"})
 
 
     fig1 = go.Figure(
