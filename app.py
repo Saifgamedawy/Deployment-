@@ -10,12 +10,12 @@ def load_data_and_create_figures():
     depression = pd.read_csv("student_depression_transformed.csv")
     performance = pd.read_csv("studperlt2_normalized.csv")
 
-    final_score = performance['Final Score'].dropna()
-    father_education = performance['Father Degree'].dropna()
-    mother_education = performance['Mother Degree'].dropna()
+    final_score = performance['Final Score']
+    father_education = performance['Father Degree']
+    mother_education = performance['Mother Degree']
     combined_education = father_education + " & " + mother_education
-    education_type = performance['Education Type'].dropna()
-    academic_pressure = depression['Academic Pressure'].dropna()
+    education_type = performance['Education Type']
+    academic_pressure = depression['Academic Pressure']
     academic_pressure = academic_pressure.replace({1: "Low", 2: "Medium", 3: "High"})
 
 
