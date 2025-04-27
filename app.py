@@ -17,7 +17,7 @@ def load_data_and_create_figures():
     education_type = performance['Education Type'].dropna()
     academic_pressure = depression['Academic Pressure'].dropna()
     academic_pressure = academic_pressure.replace({1: "Low", 2: "Medium", 3: "High"})
-    satisfaction = reviews['Sentiment Score'].dropna()
+
 
     fig1 = go.Figure(
         data=[go.Bar(
