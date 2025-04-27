@@ -15,7 +15,7 @@ def load_data_and_create_figures():
     mother_education = performance['Mother Degree']
     combined_education = father_education + " & " + mother_education
     education_type = performance['Education Type']
-    academic_pressure = depression['Academic Pressure']
+
 
 
     fig1 = go.Figure(
